@@ -28,9 +28,6 @@ jobs:
           mkdir ff-linux
           tar -xJf ff-linux.tar.xz --strip-components=2 -C ff-linux ffmpeg-master-latest-linux64-gpl/bin/ffmpeg ffmpeg-master-latest-linux64-gpl/bin/ffprobe
 
-      - name: List extracted files (for debugging)
-        run: ls -lah ff-linux
-
       - name: Download yt-dlp binaries
         run: |
           wget -O yt-dlp-win64.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
@@ -46,6 +43,13 @@ jobs:
         run: |
           cd ff-linux
           zip -j ../ffmpeg-linux64.zip ffmpeg ffprobe
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a meowsic-deps-${{ github.run_id }} -m "Meowsic dependencies release ${{ github.run_id }}"
+          git push origin meowsic-deps-${{ github.run_id }}
 
       - name: Create GitHub Release
         id: create_release
