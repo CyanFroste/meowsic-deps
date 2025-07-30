@@ -49,18 +49,26 @@ jobs:
       - name: List files before release
         run: ls -lah
 
-      - name: Create Git Tag
+      - name: Delete existing 'latest' tag (if exists)
+        run: |
+          git fetch --tags
+          if git tag -l | grep -q "^${{ env.RELEASE_TAG }}$"; then
+            git push origin :refs/tags/${{ env.RELEASE_TAG }}
+          fi
+
+      - name: Create and push 'latest' tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a $RELEASE_TAG -m "Meowsic dependencies (Latest)"
-          git push origin $RELEASE_TAG
+          git tag -f ${{ env.RELEASE_TAG }}
+          git push origin ${{ env.RELEASE_TAG }} --force
 
       - name: Create GitHub Release with Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
           name: 'Meowsic Dependencies (Latest)'
+          tag_name: ${{ env.RELEASE_TAG }}
+          overwrite_files: true
           files: |
             ./ffmpeg-win64.zip
             ./ffmpeg-linux64.zip
