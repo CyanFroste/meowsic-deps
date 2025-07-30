@@ -16,10 +16,5 @@ linux64: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux
 
 - [x] win64
 - [x] linux64
-- [ ] win32
-- [ ] linux32
-- [ ] win-arm64
-- [ ] linux-arm64
-- [ ] win-arm32
-- [ ] linux-arm32
-
+- [ ] winarm64
+- [ ] linuxarm64

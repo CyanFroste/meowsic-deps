@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
     env:
-      RELEASE_TAG: meowsic-deps-${{ github.run_id }}
+      RELEASE_TAG: latest # RELEASE_TAG: meowsic-deps-${{ github.run_id }}
 
     steps:
       - name: Checkout code
