@@ -62,8 +62,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.create_release.outputs.tag_name }}
-          files: |
-            ffmpeg-win64.zip
-            ffmpeg-linux64.zip
-            yt-dlp-win64.exe
-            yt-dlp-linux64
+          files: ffmpeg-win64.zip ffmpeg-linux64.zip yt-dlp-win64.exe yt-dlp-linux64
