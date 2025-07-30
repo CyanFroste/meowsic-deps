@@ -26,7 +26,10 @@ jobs:
         run: |
           wget -O ff-linux.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
           mkdir ff-linux
-          tar -xJf ff-linux.tar.xz --strip-components=1 --wildcards "*/ffmpeg" "*/ffprobe" -C ff-linux
+          tar -xJf ff-linux.tar.xz --wildcards --strip-components=1 "*/ffmpeg" "*/ffprobe" -C ff-linux
+
+      - name: List extracted files (for debugging)
+        run: ls -lah ff-linux
 
       - name: Download yt-dlp binaries
         run: |
@@ -42,7 +45,7 @@ jobs:
       - name: Package FFmpeg (Linux)
         run: |
           cd ff-linux
-          zip -j ../ffmpeg-linux64.zip */ffmpeg */ffprobe
+          zip -j ../ffmpeg-linux64.zip ffmpeg ffprobe
 
       - name: Create GitHub Release
         id: create_release
