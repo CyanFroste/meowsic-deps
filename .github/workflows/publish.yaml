@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
     env:
-      RELEASE_TAG: latest # RELEASE_TAG: meowsic-deps-${{ github.run_id }}
+      RELEASE_TAG: latest
 
     steps:
       - name: Checkout code
@@ -53,14 +53,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a $RELEASE_TAG -m "Meowsic dependencies release ${{ github.run_id }}"
+          git tag -a $RELEASE_TAG -m "Meowsic dependencies (Latest)"
           git push origin $RELEASE_TAG
 
       - name: Create GitHub Release with Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: 'Meowsic Dependencies (${{ github.run_id }})'
+          name: 'Meowsic Dependencies (Latest)'
           files: |
             ./ffmpeg-win64.zip
             ./ffmpeg-linux64.zip
