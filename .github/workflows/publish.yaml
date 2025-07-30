@@ -46,6 +46,16 @@ jobs:
           cd ff-linux
           zip -j ../ffmpeg-linux64.zip ffmpeg ffprobe
 
+      - name: List files before release
+        run: ls -lah
+
+      - name: Validate required artifacts exist
+        run: |
+          test -f ffmpeg-win64.zip
+          test -f ffmpeg-linux64.zip
+          test -f yt-dlp-win64.exe
+          test -f yt-dlp-linux64
+
       - name: Create Git Tag
         run: |
           git config user.name "github-actions[bot]"
