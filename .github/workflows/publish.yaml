@@ -42,14 +42,14 @@ jobs:
       - name: Package FFmpeg (Linux)
         run: |
           cd ff-linux
-          zip ../ffmpeg-linux64.zip ffmpeg ffprobe
+          zip -j ../ffmpeg-linux64.zip */ffmpeg */ffprobe
 
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "meowsic-deps-${{ github.run_id }}"
-          name: "Meowsic Dependencies (${{ github.run_id }})"
+          tag_name: 'meowsic-deps-${{ github.run_id }}'
+          name: 'Meowsic Dependencies (${{ github.run_id }})'
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
