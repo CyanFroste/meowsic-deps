@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      RELEASE_TAG: meowsic-deps-${{ github.run_id }}
 
     steps:
       - name: Checkout code
@@ -44,22 +46,16 @@ jobs:
           cd ff-linux
           zip -j ../ffmpeg-linux64.zip ffmpeg ffprobe
 
-      - name: Create tag
+      - name: Create Git Tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a meowsic-deps-${{ github.run_id }} -m "Meowsic dependencies release ${{ github.run_id }}"
-          git push origin meowsic-deps-${{ github.run_id }}
+          git tag -a $RELEASE_TAG -m "Meowsic dependencies release ${{ github.run_id }}"
+          git push origin $RELEASE_TAG
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create GitHub Release with Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: 'meowsic-deps-${{ github.run_id }}'
+          tag_name: ${{ env.RELEASE_TAG }}
           name: 'Meowsic Dependencies (${{ github.run_id }})'
-
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.create_release.outputs.tag_name }}
           files: ffmpeg-win64.zip ffmpeg-linux64.zip yt-dlp-win64.exe yt-dlp-linux64
