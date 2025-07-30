@@ -49,13 +49,6 @@ jobs:
       - name: List files before release
         run: ls -lah
 
-      - name: Validate required artifacts exist
-        run: |
-          test -f ffmpeg-win64.zip
-          test -f ffmpeg-linux64.zip
-          test -f yt-dlp-win64.exe
-          test -f yt-dlp-linux64
-
       - name: Create Git Tag
         run: |
           git config user.name "github-actions[bot]"
@@ -68,4 +61,8 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           name: 'Meowsic Dependencies (${{ github.run_id }})'
-          files: ffmpeg-win64.zip ffmpeg-linux64.zip yt-dlp-win64.exe yt-dlp-linux64
+          files: |
+            ./ffmpeg-win64.zip
+            ./ffmpeg-linux64.zip
+            ./yt-dlp-win64.exe
+            ./yt-dlp-linux64
