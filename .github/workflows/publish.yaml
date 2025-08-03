@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-meowsic-dependencies:
-    name: Build Meowsic Dependencies
+  publish-deps:
+    name: Build and Publish (win64 + linux64)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -13,65 +13,91 @@ jobs:
       RELEASE_TAG: latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install required tools
-        run: sudo apt-get update && sudo apt-get install -y unzip xz-utils zip
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y wget unzip xz-utils zip
 
-      - name: Download FFmpeg (Windows)
+      - name: Download FFmpeg binaries
         run: |
           wget -O ff-win.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
-          unzip -j ff-win.zip "*/bin/ffmpeg.exe" "*/bin/ffprobe.exe" -d ff-win
-
-      - name: Download FFmpeg (Linux)
-        run: |
           wget -O ff-linux.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
-          mkdir ff-linux
-          tar -xJf ff-linux.tar.xz --strip-components=2 -C ff-linux ffmpeg-master-latest-linux64-gpl/bin/ffmpeg ffmpeg-master-latest-linux64-gpl/bin/ffprobe
+
+      - name: Extract Win FFmpeg and GPL license
+        run: |
+          unzip -j ff-win.zip "*/bin/ffmpeg.exe" "*/LICENSE.txt" -d win64          
+          mv win64/LICENSE.txt LICENSE-ffmpeg-gpl
+
+      - name: Extract Linux FFmpeg
+        run: |
+          mkdir linux64
+          tar -xJf ff-linux.tar.xz --strip-components=2 -C linux64 ffmpeg-master-latest-linux64-gpl/bin/ffmpeg
+          chmod +x linux64/ffmpeg
 
       - name: Download yt-dlp binaries
         run: |
-          wget -O yt-dlp-win64.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
-          wget -O yt-dlp-linux64 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux
-          chmod +x yt-dlp-linux64
+          wget -O win64/yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+          wget -O linux64/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux
+          chmod +x linux64/yt-dlp
 
-      - name: Package FFmpeg (Windows)
+      - name: Download FFmpeg-Builds' MIT license and yt-dlp's Unlicense
         run: |
-          cd ff-win
-          zip ../ffmpeg-win64.zip ffmpeg.exe ffprobe.exe
+          wget -O LICENSE-yt-dlp https://raw.githubusercontent.com/yt-dlp/yt-dlp/master/LICENSE
+          wget -O LICENSE-ffmpeg-builds https://raw.githubusercontent.com/BtbN/FFmpeg-Builds/master/LICENSE
 
-      - name: Package FFmpeg (Linux)
+      - name: Package win64 ZIP
         run: |
-          cd ff-linux
-          zip -j ../ffmpeg-linux64.zip ffmpeg ffprobe
+          cd win64
+          zip -j ../win64.zip yt-dlp.exe ffmpeg.exe ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds
 
-      - name: List files before release
-        run: ls -lah
+      - name: Package linux64 ZIP
+        run: |
+          cd linux64
+          zip -j ../linux64.zip yt-dlp ffmpeg ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds
 
-      - name: Delete existing 'latest' tag (if exists)
+      - name: List resulting ZIPs
+        run: ls -lh win64.zip linux64.zip
+
+      - name: Reset 'latest' tag if exists
         run: |
           git fetch --tags
-          if git tag -l | grep -q "^${{ env.RELEASE_TAG }}$"; then
+          if git tag -l | grep -qx "${{ env.RELEASE_TAG }}"; then
             git push origin :refs/tags/${{ env.RELEASE_TAG }}
           fi
 
-      - name: Create and push 'latest' tag
+      - name: Push 'latest' tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -f ${{ env.RELEASE_TAG }}
           git push origin ${{ env.RELEASE_TAG }} --force
 
-      - name: Create GitHub Release with Assets
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: 'Meowsic Dependencies (Latest)'
+          name: 'Meowsic Dependencies (latest)'
           tag_name: ${{ env.RELEASE_TAG }}
+          body: |
+            This release includes two OS-specific bundles:
+
+            ❇️ **win64.zip**
+             - `yt-dlp.exe` (executable)
+             - `ffmpeg.exe` (executable)
+             - `LICENSE-yt-dlp` (Unlicense — public domain)
+             - `LICENSE-ffmpeg-gpl` (upstream GPL)
+             - `LICENSE-ffmpeg-builds` (MIT license from BtbN project)
+
+            ❇️ **linux64.zip**
+             - `yt-dlp` (executable)
+             - `ffmpeg` (executable)
+             - `LICENSE-yt-dlp` (Unlicense — public domain)
+             - `LICENSE-ffmpeg-gpl` (upstream GPL)
+             - `LICENSE-ffmpeg-builds` (MIT license from BtbN project)
+
+            No other binaries or source code are bundled.
           files: |
-            ./ffmpeg-win64.zip
-            ./ffmpeg-linux64.zip
-            ./yt-dlp-win64.exe
-            ./yt-dlp-linux64
+            ./win64.zip
+            ./linux64.zip
