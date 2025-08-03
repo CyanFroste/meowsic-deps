@@ -62,6 +62,13 @@ All builds currently provide **64-bit binaries** only:
 
 - **Unlicense**: yt-dlp is in the public domain under the Unlicense; there are no copyleft restrictions, but attribution and transparency are preserved.
 
-- **YouTube Terms of Service (TOS)**: Meowsic’s distribution of these tools **does not imply People-centric use is TOS-compliant**. Users must comply with [YouTube’s API and content TOS](https://developers.google.com/youtube/terms) if they use Meowsic to access or redistribute YouTube content.
+- **YouTube Terms of Service (TOS)**: Meowsic optionally streams YouTube audio using `yt-dlp`. Users are subject to [**YouTube's Terms of Service**](https://www.youtube.com/t/terms).
+
+> ⚠️ The YouTube Terms explicitly **prohibit**:
+>
+> - _Downloading or scraping content_ that isn't explicitly permitted (e.g. no download button on the page)
+> - _Accessing the service using automated means_, unless allowed in YouTube’s `robots.txt` or with prior written permission
+> - Any use of the Service beyond **personal, non-commercial** viewing/listening directly on YouTube  
+>   — all of which covers many scraping/downloading methods—including `yt-dlp` usage.
 
 - **User Responsibility**: By using Meowsic, you acknowledge you are responsible for any legal risks arising from how yt-dlp and ffmpeg are used—including copyright and streaming. Meowsic itself does not host or modify these tools.
