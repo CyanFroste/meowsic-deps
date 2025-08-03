@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-deps:
+  build-and-publish-dependencies:
     name: Build and Publish (win64 + linux64)
     runs-on: ubuntu-latest
     permissions:
@@ -13,22 +13,22 @@ jobs:
       RELEASE_TAG: latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        name: Checkout
         with:
           fetch-depth: 0
 
       - name: Install tools
         run: sudo apt-get update && sudo apt-get install -y wget unzip xz-utils zip
 
-      - name: Download FFmpeg binaries
+      - name: Download FFmpeg (Windows and Linux)
         run: |
           wget -O ff-win.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
           wget -O ff-linux.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
 
-      - name: Extract Win FFmpeg and GPL license
+      - name: Extract Windows FFmpeg and GPL license
         run: |
-          unzip -j ff-win.zip "*/bin/ffmpeg.exe" "*/LICENSE.txt" -d win64          
+          unzip -j ff-win.zip "*/bin/ffmpeg.exe" "*/LICENSE.txt" -d win64
           mv win64/LICENSE.txt LICENSE-ffmpeg-gpl
 
       - name: Extract Linux FFmpeg
@@ -43,23 +43,29 @@ jobs:
           wget -O linux64/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux
           chmod +x linux64/yt-dlp
 
-      - name: Download FFmpeg-Builds' MIT license and yt-dlp's Unlicense
+      - name: Download yt-dlp Unlicense and BtbN MIT license
         run: |
           wget -O LICENSE-yt-dlp https://raw.githubusercontent.com/yt-dlp/yt-dlp/master/LICENSE
           wget -O LICENSE-ffmpeg-builds https://raw.githubusercontent.com/BtbN/FFmpeg-Builds/master/LICENSE
 
-      - name: Package win64 ZIP
+      - name: Add written source-offer (GPL §6)
+        run: |
+          echo "FFmpeg binary is built with GPL-enabled codecs as distributed by BtbN/FFmpeg-Builds." > FFmpeg-source-offer
+          echo "Source code for this exact build is available here:" >> FFmpeg-source-offer
+          echo "  https://github.com/BtbN/FFmpeg-Builds/releases/latest" >> FFmpeg-source-offer
+
+      - name: Package win64.zip
         run: |
           cd win64
-          zip -j ../win64.zip yt-dlp.exe ffmpeg.exe ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds
+          zip -j ../win64.zip yt-dlp.exe ffmpeg.exe ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds ../FFmpeg-source-offer
 
-      - name: Package linux64 ZIP
+      - name: Package linux64.zip
         run: |
           cd linux64
-          zip -j ../linux64.zip yt-dlp ffmpeg ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds
+          zip -j ../linux64.zip yt-dlp ffmpeg ../LICENSE-yt-dlp ../LICENSE-ffmpeg-gpl ../LICENSE-ffmpeg-builds ../FFmpeg-source-offer
 
-      - name: List resulting ZIPs
-        run: ls -lh win64.zip linux64.zip
+      - name: List files
+        run: ls -lah
 
       - name: Reset 'latest' tag if exists
         run: |
@@ -81,23 +87,21 @@ jobs:
           name: 'Meowsic Dependencies (latest)'
           tag_name: ${{ env.RELEASE_TAG }}
           body: |
-            This release includes two OS-specific bundles:
-
             ❇️ **win64.zip**
-             - `yt-dlp.exe` (executable)
-             - `ffmpeg.exe` (executable)
-             - `LICENSE-yt-dlp` (Unlicense — public domain)
-             - `LICENSE-ffmpeg-gpl` (upstream GPL)
-             - `LICENSE-ffmpeg-builds` (MIT license from BtbN project)
+            - yt-dlp.exe (Unlicense)
+            - ffmpeg.exe (GPL-enabled binary from BtbN/FFmpeg-Builds)
+            - Includes:
+              - LICENSE-yt-dlp (Unlicense)
+              - LICENSE-ffmpeg-gpl (GPL license)
+              - LICENSE-ffmpeg-builds (MIT wrapper license)
+              - FFmpeg-source-offer (GPL source offer)
 
             ❇️ **linux64.zip**
-             - `yt-dlp` (executable)
-             - `ffmpeg` (executable)
-             - `LICENSE-yt-dlp` (Unlicense — public domain)
-             - `LICENSE-ffmpeg-gpl` (upstream GPL)
-             - `LICENSE-ffmpeg-builds` (MIT license from BtbN project)
+            - yt-dlp (Unlicense)
+            - ffmpeg (GPL-enabled binary)
+            - Same set of license/source-offer files
 
-            No other binaries or source code are bundled.
+            No other binaries or source code are bundled. All third-party code is from upstream and redistributed under its own license.
           files: |
             ./win64.zip
             ./linux64.zip
