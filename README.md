@@ -35,11 +35,9 @@ FFmpeg-source-offer     ← Written offer to obtain the FFmpeg source code
 
 Sources for user verification (embedded in `FFmpeg-source-offer`):
 
-- FFmpeg (GPL-enabled build):  
-  `https://github.com/BtbN/FFmpeg-Builds/releases/latest`
+- FFmpeg (GPL-enabled build): https://github.com/BtbN/FFmpeg-Builds/releases/latest
 
-- yt-dlp:  
-  `https://github.com/yt-dlp/yt-dlp`
+- yt-dlp: https://github.com/yt-dlp/yt-dlp
 
 These URLs point to the **exact upstream versions** bundled in each Meowsic release.
 
